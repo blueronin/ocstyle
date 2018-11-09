@@ -54,15 +54,19 @@ def main():
 
   for filename in filenames:
     if not os.path.isdir(filename):
-      print filename
+      messages = []
       for part in check(filename, args.maxLineLength):
-        if isinstance(part, rules.Error):
-          if part.kind not in args.ignore.split(','):
-            exit_code = 1
-            print 'ERROR: %s' % part
+        if isinstance(part, rules.Error) and part.kind not in args.ignore.split(','):
+          exit_code = 1
+          messages.append('ERROR: %s' % part)
         elif not args.quiet:
-          print 'WARNING: unparsed: %r' % part
-    print
+          messages.append('WARNING: unparsed: %r' % part)
+
+      if len(messages):
+        print filename
+        for message in messages:
+          print message
+        print
 
   exit(exit_code)
 
