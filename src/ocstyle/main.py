@@ -17,7 +17,6 @@
 
 import argparse
 import os.path
-import sys
 
 import parcon
 
@@ -47,17 +46,25 @@ def main():
 
   parser = argparse.ArgumentParser()
   parser.add_argument("--maxLineLength", action="store", type=int, default=120, help="Maximum line length")
+  parser.add_argument("--ignore", type=str, default='', help="Rules to ignore")
+  parser.add_argument("--quiet", action='store_true', help="Don't display warnings")
   args, filenames = parser.parse_known_args()
+
+  exit_code = 0
 
   for filename in filenames:
     if not os.path.isdir(filename):
       print filename
       for part in check(filename, args.maxLineLength):
         if isinstance(part, rules.Error):
-          print 'ERROR: %s' % part
-        else:
-          print 'unparsed: %r' % part
+          if part.kind not in args.ignore.split(','):
+            exit_code = 1
+            print 'ERROR: %s' % part
+        elif not args.quiet:
+          print 'WARNING: unparsed: %r' % part
     print
+
+  exit(exit_code)
 
 
 if __name__ == '__main__':
